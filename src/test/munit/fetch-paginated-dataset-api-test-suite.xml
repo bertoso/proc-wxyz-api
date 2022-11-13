@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<munit:config name="fetch-paginated-dataset-api-test-suite.xml" />
+		<os:object-store name="Object_store-categories-test" doc:name="Object store" doc:id="6f1e88d6-33d7-4f59-90ac-b1e806fceda3" entryTtl="10" />
+	<flow name="fetch-dataset-test-store-flag-flow" doc:id="ec652d93-a0d3-4ebe-8db5-399c263688de" >
+		<os:store doc:id="facc0577-21a6-4dd8-b64d-14adb86ce5ce" doc:name="lastPage" objectStore="Object_store-categories-test" key="lastPage"/>
+	</flow>
+	<flow name="fetch-dataset-test-retrieve-flag-flow" doc:id="76277b11-9255-46d5-83b9-3eba12d46e22" >
+		<os:retrieve doc:id="08fb2227-b7a2-49e0-8b67-3f45037d2ad2" doc:name="lastPage" key="lastPage" objectStore="Object_store-categories-test"/>
+	</flow>
+	<flow name="dataset-return-page-flow" doc:id="a9f65a79-ed79-4758-9b64-cde70f0a9a8f" >
+		<flow-ref doc:name="fetch-dataset-test-retrieve-flag-flow" doc:id="89b2e92a-6c51-4c1e-8a90-adb019dfd9fc" name="fetch-dataset-test-retrieve-flag-flow" target="last"/>
+		<choice doc:name="Last page?" doc:id="74295ed4-7b9e-4009-9350-2ef0e66a9901" >
+			<when expression="#[vars.last == false]">
+				<set-payload value="#[true]" doc:name="true" doc:id="ad58434f-f834-456e-bddc-a2aefaddebf7" />
+				<flow-ref doc:name="fetch-dataset-test-store-flag-flow" doc:id="964a0059-f839-4c79-ba55-d3c27095142b" name="fetch-dataset-test-store-flag-flow"/>
+				<set-payload value="#[MunitTools::getResourceAsString('examples/get-dataset-page-response.json')]" doc:name="page" doc:id="0d61c76d-c1f4-4128-b049-3106760f4ea7" mimeType="application/json" encoding="UTF-8"/>
+			</when>
+			<otherwise >
+				<set-payload value="#[MunitTools::getResourceAsString('examples/get-dataset-last-page-response.json')]" doc:name="last page" doc:id="9a8d7dc3-f527-49ed-8443-0dcc97c214db" mimeType="application/json" encoding="UTF-8"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<munit:test name="fetch-paginated-dataset-api-success-test" doc:id="fecf4120-3272-4c27-902b-c811195bae39" >
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="impl-get-dataset-recursive-flow" />
+			<munit:enable-flow-source value="vm-connector-publish-dataset-flow" />
+			<munit:enable-flow-source value="vm-connector-publish-query-params-flow" />
+			<munit:enable-flow-source value="impl-wxyz-pull-paginated-dataset-subflow" />
+			<munit:enable-flow-source value="proc-wxyz-process-dataset-flow" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<set-payload value="#[false]" doc:name="false" doc:id="b4907977-9388-4ba1-b1d2-dd126fe9946d" />
+			<flow-ref doc:name="fetch-dataset-test-store-flag-flow" doc:id="8ddffde7-8115-46d1-972b-05616dcc44c3" name="fetch-dataset-test-store-flag-flow"/>
+			<munit-tools:mock-when doc:name="GET /dataset" doc:id="5b1d92bb-6bb7-4c26-8152-eae3311409f5" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET /dataset" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="5a80ee97-db24-427e-bc11-45619fc1af65" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-call flow="dataset-return-page-flow" />
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="aws-sqs-send-message-to-queue" doc:id="a0fb1b9f-197b-46fd-bbba-912246596720" processor="sqs:send-message">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d435bf79-a33f-4fc2-b318-88d79023b428" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Send dataset" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="proc-wxyz-fetch-paginated-dataset-api" doc:id="c952a3e2-0472-41af-bbee-8126035d02e2" name="proc-wxyz-fetch-paginated-dataset-api"/>
+			<munit-tools:sleep time="10" doc:name="Sleep 5 secs" doc:id="9da7be7a-ba30-4a1a-b4dd-0bb275cb2cd9" timeUnit="SECONDS"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="END - fetch paginated dataset" doc:id="89209c31-9c8e-4093-ab35-763affd7440e" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="END - fetch paginated dataset" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="33bdc651-d34a-431b-9abc-9d461c630005" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="END - process dataset" doc:id="5b4e7780-9a11-4811-be87-5421ec9d78e7" processor="logger" times="2">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="END - process dataset" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="8b718343-aecf-4aa8-ac0d-ddc942673776" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="fetch-paginated-dataset-api-error-test" doc:id="b7563838-f380-4eb7-82fa-a052b3bdd1c2">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="impl-get-dataset-recursive-flow" />
+			<munit:enable-flow-source value="vm-connector-publish-dataset-flow" />
+			<munit:enable-flow-source value="vm-connector-publish-query-params-flow" />
+			<munit:enable-flow-source value="impl-wxyz-pull-paginated-dataset-subflow" />
+			<munit:enable-flow-source value="proc-wxyz-process-dataset-flow" />
+		</munit:enable-flow-sources>
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="GET /dataset" doc:id="60b651c0-0d8b-4863-b1e7-1d9490cb5da5" processor="http:request">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="GET /dataset" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="5a80ee97-db24-427e-bc11-45619fc1af65" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="HTTP:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref doc:name="proc-wxyz-fetch-paginated-dataset-api" doc:id="37a575be-4676-4ff3-b0b8-87e068d3d046" name="proc-wxyz-fetch-paginated-dataset-api" />
+			<munit-tools:sleep time="2" doc:name="Sleep 2 secs" doc:id="9759731e-a111-4074-9f36-c1bccdc32dcc" timeUnit="SECONDS"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="async" doc:id="72f154db-fc52-41ab-9f92-5e5a681c4ba7" processor="async" times="0">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Async send dataset to VM queue" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="4f4d0d30-9ae5-4ab7-803a-2a1ebea29117" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+</mule>

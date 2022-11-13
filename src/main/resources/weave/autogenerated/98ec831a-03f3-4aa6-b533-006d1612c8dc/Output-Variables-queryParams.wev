@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_98ec831a_03f3_4aa6_b533_006d1612c8dc_Output_Variables_queryParams = {| search: String |}
+
