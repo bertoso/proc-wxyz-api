@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:sqs="http://www.mulesoft.org/schema/mule/sqs" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/current/mule-sqs.xsd">
+	<sqs:config name="Amazon_SQS_Configuration" doc:name="Amazon SQS Configuration" doc:id="333e019d-ebb6-4c87-a236-0013cf879781" defaultQueueUrl="dataset-queue">
+		<sqs:basic-connection accessKey="access_key" secretKey="secret_key" />
+	</sqs:config>
+	<flow name="aws-sqs-send-message-to-queue-flow" doc:id="30634eda-300f-4eed-8125-e6b8d552fe91" >
+		<logger level="INFO" doc:name="START - SQS send message to queue" doc:id="167be101-0e7c-4319-a814-ad3218943e70" message="START - SQS send message to queue"/>
+		<sqs:send-message doc:id="d435bf79-a33f-4fc2-b318-88d79023b428" config-ref="Amazon_SQS_Configuration" doc:name="Send dataset">
+			<sqs:message ><![CDATA[#[%dw 2.0
+output application/java
+---
+{
+    body: "$(write(payload, 'application/json'))"
+} as Object {
+    class: "org.mule.extension.sqs.api.model.Message"
+}]]]></sqs:message>
+		</sqs:send-message>
+		<logger level="INFO" doc:name="END - SQS send message to queue" doc:id="eb68f3e2-c542-45da-adc5-1542ca8bdce3" message="END - SQS send message to queue"/>
+		<error-handler ref="proc-wxyz-api-Error_Handler" />
+	</flow>
+</mule>

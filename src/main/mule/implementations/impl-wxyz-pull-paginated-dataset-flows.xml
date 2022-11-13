@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="impl-wxyz-pull-paginated-dataset-subflow" doc:id="89457d16-032d-4edf-9878-8e854292c469" >
+		<ee:transform doc:name="Set queryParams" doc:id="71c6038b-105b-4bf5-bf35-4418c94b9de5" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="queryParams" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"search": "42"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<vm:publish doc:name="Publish queryParams" doc:id="32de07d3-e4c0-48eb-bdd6-54301194b234" config-ref="VM_Config-queryParam" queueName="queryParam-queue"/>
+	</sub-flow>
+	<flow name="impl-get-dataset-recursive-flow" doc:id="a49fd7da-8e80-49e5-9e91-fa2c9d1245fc" >
+		<vm:listener doc:name="Pagination queryParams listener" doc:id="d5cd7898-b5a2-4900-bf69-046a4792aee4" config-ref="VM_Config-queryParam" queueName="queryParam-queue"/>
+		<ee:transform doc:name="Set queryParams" doc:id="f1f0eb6f-b766-4150-85c0-ea2e67ba81a6" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="queryParams" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="sys-wxyz-get-dataset-subflow" doc:id="8a0e09b1-bebe-40cf-8d55-b4a71d6b68a5" name="sys-wxyz-get-dataset-subflow" target="page"/>
+		<async doc:name="Async send dataset to VM queue" doc:id="4f4d0d30-9ae5-4ab7-803a-2a1ebea29117" >
+			<set-payload value="#[vars.page.data]" doc:name="dataset" doc:id="041b46f3-4756-49a4-990d-7cd1faf6988e" />
+			<flow-ref doc:name="vm-connector-publish-dataset-flow" doc:id="f345e2eb-844d-43c8-8662-955dab4c6c2c" name="vm-connector-publish-dataset-flow"/>
+		</async>
+		<choice doc:name="Is last page?" doc:id="93449cb6-ada9-4954-bd20-548f7b7f5919" >
+			<when expression="#[vars.page.is_last_page ~= false]">
+				<flow-ref doc:name="vm-connector-publish-query-params-flow" doc:id="7c101ac8-27ff-4c4e-baca-2191e139ac9c" name="vm-connector-publish-query-params-flow"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Last page reached" doc:id="d90755a8-23e4-40b6-a65b-e8d23aff95f5" message="Last page reached"/>
+			</otherwise>
+		</choice>
+		<error-handler ref="proc-wxyz-api-Error_Handler" />
+	</flow>
+</mule>

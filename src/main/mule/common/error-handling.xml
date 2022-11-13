@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="proc-wxyz-api-Error_Handler" doc:id="dabc3226-be56-4b42-a9c2-2127cb88737e" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="c70be5fd-389b-48f8-a2a4-236e689d563b" >
+			<logger level="INFO" doc:name="Error occurred" doc:id="ef2f46a0-de42-476f-a467-f59b7de1ceda" message="Error occured: #[error.errorType]"/>
+		</on-error-continue>
+	</error-handler>
+</mule>

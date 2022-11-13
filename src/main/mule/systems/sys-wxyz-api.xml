@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="sys-wxyz-get-dataset-subflow" doc:id="6744e54f-b4df-4c51-975c-99d57d1d05f8" >
+		<logger level="INFO" doc:name="START - GET /dataset" doc:id="56db9657-855d-49b8-807e-3046be52fe1e" message="START - GET /dataset" />
+		<http:request method="GET" doc:name="GET /dataset" doc:id="5a80ee97-db24-427e-bc11-45619fc1af65" config-ref="HTTP_Request_configuration" path="/dataset" />
+		<logger level="INFO" doc:name="END - GET /dataset" doc:id="404ec333-a468-43d7-97d9-a6adbcd60bef" message="END - GET /dataset" />
+	</sub-flow>
+</mule>

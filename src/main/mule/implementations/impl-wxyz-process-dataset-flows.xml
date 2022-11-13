@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<flow name="impl-wxyz-process-dataset-batch-process-flow" doc:id="50a50dbd-ef8c-4de7-96a2-ae399ae53767" >
+		<batch:job jobName="impl-wxyz-process-dataset-batch-job" doc:id="0c865d13-5e18-4b1f-bc22-ba7163e02be3" blockSize="1">
+			<batch:process-records >
+				<batch:step name="batch-step-map-fields" doc:id="40bb2833-e520-4ad3-906d-05c2573955af" >
+					<logger level="INFO" doc:name="Mapping dataset fields" doc:id="b64a9c82-5ca3-48ca-b2bf-59d5c428621b" message="Mapping dataset fields: #[payload]"/>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="ade1a868-63d3-4446-9081-de80ff845e73" size="3">
+						<logger level="INFO" doc:name="Send batch of 42 to AWS SQS" doc:id="e1f8f6c9-eb7e-420a-bcca-2dc37613985b" message="Send batch of 42 to AWS SQS"/>
+						<flow-ref doc:name="aws-sqs-send-message-to-queue-flow" doc:id="8e45c7e6-f0f6-4bf1-99a5-fc3f7cc02365" name="aws-sqs-send-message-to-queue-flow"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
+		<error-handler ref="proc-wxyz-api-Error_Handler" />
+	</flow>
+</mule>

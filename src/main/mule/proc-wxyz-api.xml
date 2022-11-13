@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	<flow name="proc-wxyz-fetch-paginated-dataset-api" doc:id="98ec831a-03f3-4aa6-b533-006d1612c8dc" >
+		<scheduler doc:name="Fetch paginated dataset" doc:id="c31699b2-a162-4d9c-846a-164bd45132f4" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="1" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="START - fetch paginated dataset" doc:id="1d75f515-2f86-47a4-83c8-273a6e6c6ca8" message="START - fetch paginated dataset"/>
+		<flow-ref doc:name="impl-wxzy-pull-paginated-dataset-subflow" doc:id="6ab3f15b-1ce7-46ae-b7ba-373d746d1438" name="impl-wxyz-pull-paginated-dataset-subflow"/>
+		<logger level="INFO" doc:name="END - fetch paginated dataset" doc:id="33bdc651-d34a-431b-9abc-9d461c630005" message="END - fetch paginated dataset"/>
+		<error-handler ref="proc-wxyz-api-Error_Handler" />
+	</flow>
+	<flow name="proc-wxyz-process-dataset-flow" doc:id="627b5712-a6cd-45ba-83a1-5c691dd53ef6">
+		<vm:listener doc:name="Dataset Listener" doc:id="980fea13-990a-486c-9a45-0dcadad5a2c3" config-ref="VM_Config-dataset" queueName="dataset-queue"/>
+		<logger level="INFO" doc:name="START - process dataset" doc:id="76e0043e-48a5-48f5-a77d-7a5b5e2a5052" message="START - process dataset"/>
+		<flow-ref doc:name="impl-wxyz-process-dataset-batch-process-flow" doc:id="cb107e0b-f83d-4b26-af30-1592f638791e" name="impl-wxyz-process-dataset-batch-process-flow"/>
+		<logger level="INFO" doc:name="END - process dataset" doc:id="8b718343-aecf-4aa8-ac0d-ddc942673776" message="END - process dataset"/>
+		<error-handler ref="proc-wxyz-api-Error_Handler" />
+	</flow>
+</mule>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+
+	<flow name="vm-connector-publish-query-params-flow" doc:id="adc24d89-9e19-459b-aab2-48d7fb4c08a2" >
+		<logger level="INFO" doc:name="START - VM publish queryParams" doc:id="b3cfba80-abca-4967-95ed-d90d93b6245c" message="START - VM publish queryParams"/>
+		<vm:publish doc:name="Publish queryParams" doc:id="e0d3d2d4-e458-405d-82e7-99037a107b5d" config-ref="VM_Config-queryParam" queueName="queryParam-queue"/>
+		<logger level="INFO" doc:name="END - VM publish queryParams" doc:id="fb783950-e5d9-4ae0-bdf9-c08c8a335b95" message="END - VM publish queryParams"/>
+		<error-handler ref="proc-wxyz-api-Error_Handler" />
+	</flow>
+	<flow name="vm-connector-publish-dataset-flow" doc:id="064ff470-0d53-4d74-9100-567588b6fd32" >
+		<logger level="INFO" doc:name="START - VM publish dataset" doc:id="bc2f1912-c0d8-4ed2-b29d-188be120e4fd" message="START - VM publish dataset"/>
+		<vm:publish doc:name="Publish dataset" doc:id="e19ac126-855e-4a9b-af96-15803ceb8fec" config-ref="VM_Config-dataset" queueName="dataset-queue"/>
+		<logger level="INFO" doc:name="END - VM publish dataset" doc:id="2d25ccbb-b1b6-4af1-90cf-879beee6d77e" message="END - VM publish dataset"/>
+		<error-handler ref="proc-wxyz-api-Error_Handler" />
+	</flow>
+</mule>

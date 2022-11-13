@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<vm:config name="VM_Config-dataset" doc:name="VM Config" doc:id="41513b9d-bf33-4185-a4e5-49ece02c56b0" >
+		<vm:queues >
+			<vm:queue queueName="dataset-queue" />
+		</vm:queues>
+	</vm:config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="967d8e69-f525-4443-ab0a-e0e4f701bb0b" >
+		<http:request-connection usePersistentConnections="false" host="wxy.com"/>
+	</http:request-config>
+	<vm:config name="VM_Config-queryParam" doc:name="VM Config" doc:id="071d525f-6dad-4fe7-8942-db7ba1801d28">
+		<vm:queues >
+			<vm:queue queueName="queryParam-queue" maxOutstandingMessages="42" />
+		</vm:queues>
+	</vm:config>
+	</mule>
